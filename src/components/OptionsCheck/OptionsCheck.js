@@ -38,11 +38,20 @@ const OptionsCheck = (props) => {
         }
     );
 
-    console.log('this is th currOptions', currOptions)
+    const checked = (name) => {
+        let value = false
+        if (currOptions.some(e => e.name == name)) {
+            value = true
+        }
+
+        return value;
+    }
+
+
     const handleChange = event => {
         // console.log('this is the event', event.target.checked, '-',event.target.value, '-',event.target.name)
 
-        handleOption && handleOption({name: event.target.name, price: parseFloat(event.target.value), add: event.target.checked})
+        handleOption && handleOption({ name: event.target.name, price: parseFloat(event.target.value), add: event.target.checked })
         // setState({ ...state, [event.target.name]: event.target.checked });
     };
 
@@ -77,11 +86,11 @@ const OptionsCheck = (props) => {
                         return <FormControlLabel
                             key={option.name + i}
                             control={<Checkbox
-                                // checked={gilad} 
+                                checked={checked(option.name)}
                                 onChange={handleChange}
                                 name={option.name}
                                 value={option.price}
-                                />
+                            />
                             }
                             label={option.name + ' ' + (option.price && `+ ${option.price.toFixed(2)}`)}
                         />
@@ -96,7 +105,7 @@ const OptionsCheck = (props) => {
                         return <FormControlLabel
                             key={option.name + i}
                             control={<Checkbox
-                                // checked={gilad} 
+                                checked={checked(option.name)}
                                 onChange={handleChange}
                                 name={option.name}
                                 value={option.price} />
