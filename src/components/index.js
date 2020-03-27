@@ -5,3 +5,4 @@ export { default as Item } from './Item';
 export { default as ItemList } from './ItemList';
 export { default as FadeAnimation } from './FadeAnimation';
 export { default as OptionsCheck } from './OptionsCheck';
+export { default as Cart } from './Cart';

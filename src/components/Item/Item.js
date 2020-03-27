@@ -18,8 +18,10 @@ import {
   Typography
 } from '@material-ui/core';
 
+import { createSubcollectionDocument, updateSubcollectionDocument } from 'data/FirestoreUpdate'
+
 import { OptionsCheck } from 'components'
-import { AuthContext } from 'context'
+import { AuthContext, CartContext, OrgContext } from 'context'
 import { capitalize } from 'helpers'
 
 const useStyles = makeStyles(theme => ({
@@ -47,21 +49,17 @@ const useStyles = makeStyles(theme => ({
 
 export default function Item(props) {
   const classes = useStyles();
-  const { data, app } = props
-  const user = useContext(AuthContext)
+  const { data, app, category } = props
+
   const [open, setOpen] = useState(false);
   const [orderItem, setOrderItem] = useState()
   const [options, setOptions] = useState([])
+  const [quantity, setQuantity] = useState(1)
 
-  // app.auth().signInAnonymously()
-  // .then(()=> console.log('Signed in anonymous'))
-  // .catch((error) => {
-  //   // Handle Errors here.
-  //   var errorCode = error.code;
-  //   var errorMessage = error.message;
-  //   console.log('There was an  error signing in the user', errorCode, errorMessage)
-  //   // ...
-  // });
+  const user = useContext(AuthContext);
+  const cart = useContext(CartContext);
+  const orgCollection = useContext(OrgContext)
+
 
   const handleOpen = () => {
     setOpen(true);
@@ -71,8 +69,126 @@ export default function Item(props) {
     setOpen(false);
   };
 
-  const addToCart = () => {
+  // console.log('this is the cart in the item', cart)
 
+  const createNewCart = async (id, item) => {
+    if (!item || !id) return;
+    console.log('these are the two items received', id, item)
+
+    const newCart = {
+      customerID: id,
+      cart: [],
+      total: 0
+    }
+
+    newCart.cart.push(item)
+
+    const done = await createSubcollectionDocument(app, orgCollection, 'carts', 'activeCarts', id, newCart)
+
+    console.log('creating new cart was done', done)
+  }
+
+  const updateCart = (id, item, addToCart) => {
+    if (!cart && addToCart) {
+      return createNewCart(id, item)
+    }
+
+    let mutableArr = cart.cart || []
+
+    if (addToCart && mutableArr.length === 0) {
+      console.log('here')
+      const itm = {
+        categoryName: category,
+        ...data,
+        options,
+        quantity
+      }
+      mutableArr.push(itm)
+    } else
+      if (addToCart && mutableArr.length > 0) {
+        console.log('here2')
+        const itm = {
+          categoryName: category,
+          ...data,
+          options,
+          quantity: 1
+        }
+        let itemPresent = false;
+        for (let i = 0; i < mutableArr.length; i++) {
+          if (mutableArr[i].id === item.id && JSON.stringify(item.options) === JSON.stringify(mutableArr[i].options) ) {
+            mutableArr[i].quantity += 1;
+            itm.quantity = mutableArr[i].quantity;
+            mutableArr[i] = itm;
+            itemPresent = true;
+          }
+        }
+        if(!itemPresent){
+          mutableArr.push(itm)
+        }
+      } else
+        if (!addToCart && mutableArr.length > 0) {
+          console.log('here3')
+          // Reversed loop to prevent bugs from reaching same one again
+          for (let i = mutableArr.length - 1; i >= 0; i--) {
+            if (mutableArr[i].id === item.id) {
+              if (mutableArr[i].quantity && mutableArr[i].quantity > 1) {
+                mutableArr[i].quantity -= 1;
+              } else {
+                mutableArr.splice(i, 1);
+              }
+            }
+          }
+        }
+
+    const getTotal = () => {
+      let total = 0.0
+      for (let i = 0; i < mutableArr.length; i++) {
+        const product = mutableArr[i];
+        total += product.quantity * product.price
+      }
+
+      return total;
+    }
+
+    const updatedCart = {
+      customerID: id,
+      total: getTotal(),
+      cart: mutableArr
+    }
+
+
+    updateSubcollectionDocument && updateSubcollectionDocument(app, orgCollection, 'carts', 'activeCarts', id, updatedCart)
+  }
+
+  const addToCart = () => {
+    const item = {
+      categoryName: category,
+      ...data,
+      options,
+      quantity: 1,
+    }
+    if (!user) {
+      console.log('I want to see what the cart says', cart)
+      app.auth().signInAnonymously()
+        .then((usr) => {
+          if (!cart || (cart && cart.cart.length === 0)) {
+            createNewCart(usr.user.uid, item)
+          } else {
+            //update the cart
+          }
+
+        })
+        .catch((error) => {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          return alert('There was an error adding this to your order, please try again!')
+          console.log('There was an  error signing in the user', errorCode, errorMessage)
+          // ...
+        });
+    } else {
+      updateCart(user.uid, item, true)
+    }
   }
 
   const handleOption = (option) => {
@@ -140,7 +256,7 @@ export default function Item(props) {
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={addToCart} color="primary">
             Add to Order
           </Button>
         </DialogActions>

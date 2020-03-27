@@ -4,6 +4,7 @@ import {
     Container,
     AppBar,
     IconButton,
+    Badge,
     Tabs,
     Tab,
     Typography,
@@ -12,6 +13,7 @@ import {
 } from '@material-ui/core';
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 import { makeStyles } from '@material-ui/styles';
+import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 
 import { withSnackbar } from 'notistack';
 import 'firebase/firestore'
@@ -19,6 +21,7 @@ import 'firebase/firestore'
 import { FirebaseContext } from 'data/Firebase'
 import { firebaseDataMap } from 'helpers'
 import { TabPanel, ItemList } from 'components'
+import { AuthContext, OrgContext, CartContext } from 'context'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -47,8 +50,12 @@ const Main = (props) => {
     const { enqueueSnackbar } = props
     const classes = useStyles();
     const firebase = useContext(FirebaseContext)
+    const user = useContext(AuthContext);
+    const orgname = useContext(OrgContext);
+    const cart = useContext(CartContext);
     const [tab, setTab] = useState(0);
-    const orgname = 'panaderia-mexico' // This should be pulled in from the init from embed
+
+    // const orgname = 'panaderia-mexico' // This should be pulled in from the init from embed
 
     const categoryQuery = firebase.firestore().collection(orgname).doc('menu').collection('categories').where('active', '==', true).orderBy('position', 'asc')
 
@@ -66,10 +73,13 @@ const Main = (props) => {
         }
     );
 
+
+
     const handleTabChange = (event, newValue) => {
         setTab(newValue);
     };
 
+    // console.log('this is cart, loadingCart, errorCart', cart, loadingCart, errorCart)
 
 
     const handleOrg = () => {
@@ -91,6 +101,12 @@ const Main = (props) => {
                     >
                         {!loadingOrg ? organization.name : 'Bright Delivery'}
                     </Typography>
+                    {cart && cart.cart.length > 0 && <IconButton edge="end" className={classes.menuButton} onClick={() => console.log('the cart burton was pressed')} color="inherit" aria-label="view-cart">
+                        <Badge badgeContent={cart.cart.length} color="secondary">
+                            <ShoppingBasketIcon />
+                        </Badge>
+
+                    </IconButton>}
                 </Toolbar>
                 {categories && <Tabs
                     value={tab}

@@ -81,7 +81,7 @@ const ItemList = (props) => {
             <GridList cellHeight='auto' className={classes.gridList}  cols={getGridListCols()}>
                 {firebaseDataMap(items.docs).map((item, i) => {
                     return <GridListTile  key={item.id} cols={1}>
-                        <Item data={item} app={app}/>
+                        <Item data={item} category={category.name} app={app}/>
                     </GridListTile>
                 })}
               

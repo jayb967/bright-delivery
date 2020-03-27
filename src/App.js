@@ -8,7 +8,8 @@ import { SnackbarProvider } from 'notistack';
 import logo from './logo.svg';
 import FirebaseProvider from 'data/Firebase'
 import theme from './theme';
-import { Main, AuthGuard } from 'components'
+import { Main, AuthGuard, Cart } from 'components'
+import { OrgContext } from 'context'
 // import './App.css';
 import './data/Firebase'
 
@@ -23,9 +24,14 @@ function App() {
           <FirebaseProvider>
             {/* <ScrollReset /> */}
             {/* <GoogleAnalytics /> */}
-            <AuthGuard>
-              <Main />
-            </AuthGuard>
+            {/* This should be pulled from the init method in the embed */}
+            <OrgContext.Provider value={'panaderia-mexico'}> 
+              <AuthGuard>
+                <Cart>
+                  <Main />
+                </Cart>
+              </AuthGuard>
+            </OrgContext.Provider>
           </FirebaseProvider>
 
         </MuiPickersUtilsProvider>
