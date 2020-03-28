@@ -15,9 +15,10 @@ import './data/Firebase'
 import 'react-square-payment-form/lib/default.css'
 
 
-function App() {
+function App(props) {
+  const {orgBrightdel} = props
 
-  alert(`this is the the window.orgBrightdel ${window.orgBrightdel}`)
+  alert(`this is the the window.orgBrightdel ${orgBrightdel}`)
   return (
 
     <ThemeProvider theme={theme}>
@@ -28,7 +29,7 @@ function App() {
             {/* <ScrollReset /> */}
             {/* <GoogleAnalytics /> */}
             {/* This should be pulled from the init method in the embed */}
-            <OrgContext.Provider value={window.orgBrightdel || 'panaderia-mexico'}>
+            <OrgContext.Provider value={orgBrightdel || 'panaderia-mexico'}>
               <AuthGuard>
                 <Cart>
                     <Main />

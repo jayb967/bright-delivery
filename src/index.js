@@ -4,14 +4,60 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+// ReactDOM.render(
+//     <App />,
+//   document.getElementById('bright-delivery')
+// );
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+// serviceWorker.unregister();
+
+
+export default class BrightDel {
+  static el;
+
+  static mount({ orgBrightdel, ...props } = {}) {
+    const component = <App orgBrightdel={orgBrightdel} {...props} />;
+
+    console.log('this was called and this is the asdflkajsdflkj')
+
+    function doRender() {
+      if (BrightDel.el) {
+        throw new Error('BrightDel is already mounted, unmount first');
+      }
+      // const el = document.createElement('div');
+      // el.setAttribute('id', 'bright-delivery');
+      // el = document.getElementById('bright-delivery')
+
+      // if (parentElement) {
+      //   document.querySelector(parentElement).appendChild(el);
+      // } else {
+      //   document.body.appendChild(el);
+      // }
+
+      ReactDOM.render(
+        component,
+        document.getElementById('bright-delivery')
+      );
+      BrightDel.el = document.getElementById('bright-delivery');
+    }
+
+    if (document.readyState === 'complete') {
+      console.log('this is called and ready?')
+      doRender();
+    } else {
+      window.addEventListener('load', () => {
+        doRender();
+      });
+    }
+    serviceWorker.unregister()
+  }
+
+  static unmount() {
+    if (!BrightDel.el) {
+      throw new Error('BrightDel is not mounted, mount first');
+    }
+    ReactDOM.unmountComponentAtNode(BrightDel.el);
+    BrightDel.el.parentNode.removeChild(BrightDel.el);
+    BrightDel.el = null;
+  }
+}

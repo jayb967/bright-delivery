@@ -56,8 +56,9 @@ const useStyles = makeStyles(theme => ({
     // necessary for content to be below app bar
     toolbar: theme.mixins.toolbar,
     root: {
-        display: 'flex',
-        // padding: theme.spacing(3)
+        // display: 'flex',
+        position: 'relative',
+        padding: theme.spacing(3)
     },
     tabs: {
         flexGrow: 1,
@@ -144,10 +145,26 @@ const Main = (props) => {
     const createNewCart = async (id, item) => {
         if (!item || !id) return;
 
+        const getTotal = () => {
+            let total = 0.0
+                const product = item;
+                total += (product.quantity || 1) * product.price
+                if (product.options && product.options.length > 0) {
+                    product.options.forEach(opt => {
+                        if (opt.price) {
+                            total += opt.price
+                        }
+                    });
+                }
+            
+
+            return total;
+        }
+
         const newCart = {
             customerID: id,
             cart: [],
-            total: 0
+            total: getTotal()
         }
 
         newCart.cart.push(item)
@@ -300,7 +317,7 @@ const Main = (props) => {
     return (
         <div className={classes.root}>
             <CssBaseline />
-            <AppBar position="fixed" color="default" className={classes.appBar}>
+            <AppBar position="sticky" color="default" className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="organization logo">
                         <Avatar alt={organization} src={org && organization.logo} />
