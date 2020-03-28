@@ -12,6 +12,7 @@ import { Main, AuthGuard, Cart } from 'components'
 import { OrgContext } from 'context'
 // import './App.css';
 import './data/Firebase'
+import 'react-square-payment-form/lib/default.css'
 
 
 function App() {
@@ -25,7 +26,7 @@ function App() {
             {/* <ScrollReset /> */}
             {/* <GoogleAnalytics /> */}
             {/* This should be pulled from the init method in the embed */}
-            <OrgContext.Provider value={'panaderia-mexico'}>
+            <OrgContext.Provider value={window.orgBrightdel || 'panaderia-mexico'}>
               <AuthGuard>
                 <Cart>
                     <Main />

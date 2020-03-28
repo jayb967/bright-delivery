@@ -25,7 +25,6 @@ const CheckoutButton = (props) => {
 
     const classes = useStyles()
 
-    console.log('this is the cart fomr the checkout button', cart)
     return (
         <div className={classes.root}>
             <Button variant="contained" color='primary' >Checkout now {totals && totals.total}</Button>
