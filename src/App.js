@@ -16,6 +16,8 @@ import 'react-square-payment-form/lib/default.css'
 
 
 function App() {
+
+  alert(`this is the the window.orgBrightdel ${window.orgBrightdel}`)
   return (
 
     <ThemeProvider theme={theme}>
