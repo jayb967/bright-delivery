@@ -25,10 +25,11 @@ function App() {
             {/* <ScrollReset /> */}
             {/* <GoogleAnalytics /> */}
             {/* This should be pulled from the init method in the embed */}
-            <OrgContext.Provider value={'panaderia-mexico'}> 
+            <OrgContext.Provider value={'panaderia-mexico'}>
               <AuthGuard>
                 <Cart>
-                  <Main />
+                    <Main />
+                    
                 </Cart>
               </AuthGuard>
             </OrgContext.Provider>

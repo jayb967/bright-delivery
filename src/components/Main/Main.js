@@ -2,17 +2,28 @@ import React, { useState, useContext } from 'react'
 import {
     Avatar,
     Container,
+    CssBaseline,
     AppBar,
     IconButton,
     Badge,
+    Divider,
+    Drawer,
+    Hidden,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
     Tabs,
     Tab,
     Typography,
     Box,
-    Toolbar
+    Toolbar,
+    useMediaQuery,
+    Button
 } from '@material-ui/core';
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 import { makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 
 import { withSnackbar } from 'notistack';
@@ -20,12 +31,31 @@ import 'firebase/firestore'
 
 import { FirebaseContext } from 'data/Firebase'
 import { firebaseDataMap } from 'helpers'
-import { TabPanel, ItemList } from 'components'
+import { TabPanel, ItemList, CheckoutButton } from 'components'
 import { AuthContext, OrgContext, CartContext } from 'context'
 
+const drawerWidth = 250;
+
 const useStyles = makeStyles(theme => ({
-    root: {
+    appBar: {
+        zIndex: theme.zIndex.drawer + 1,
+    },
+    drawer: {
+        width: drawerWidth,
+        flexShrink: 0,
+    },
+    drawerPaper: {
+        width: drawerWidth,
+    },
+    content: {
+        flexGrow: 1,
         padding: theme.spacing(3)
+    },
+    // necessary for content to be below app bar
+    toolbar: theme.mixins.toolbar,
+    root: {
+        display: 'flex',
+        // padding: theme.spacing(3)
     },
     tabs: {
         flexGrow: 1,
@@ -54,6 +84,9 @@ const Main = (props) => {
     const orgname = useContext(OrgContext);
     const cart = useContext(CartContext);
     const [tab, setTab] = useState(0);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const theme = useTheme()
+    const mobileDevice = useMediaQuery(theme.breakpoints.down('sm'));
 
     // const orgname = 'panaderia-mexico' // This should be pulled in from the init from embed
 
@@ -73,14 +106,13 @@ const Main = (props) => {
         }
     );
 
-
+    const handleDrawerToggle = () => {
+        setMobileOpen(!mobileOpen);
+    };
 
     const handleTabChange = (event, newValue) => {
         setTab(newValue);
     };
-
-    // console.log('this is cart, loadingCart, errorCart', cart, loadingCart, errorCart)
-
 
     const handleOrg = () => {
         if (!loadingOrg && org) return org.data()
@@ -89,9 +121,56 @@ const Main = (props) => {
 
     const organization = handleOrg();
 
+    const getCartQty = () => {
+        let qty = 0
+        if (cart && cart.cart.length) {
+            cart.cart.forEach((itm) => {
+                if (itm.quantity) {
+                    qty += itm.quantity
+                }
+
+            })
+        }
+        return qty;
+    }
+
+    const bottomChkOutButton = () => {
+
+    }
+
+    const drawer = (
+        <div>
+            <div className={classes.toolbar} />
+            <Divider />
+            <List>
+                {cart && cart.cart.length && cart.cart.map((text, index) => (
+                    <React.Fragment>
+                    <ListItem button key={text.id + index}>
+                        <ListItemText primary={`x${text.quantity} ${text.name}`} secondary={text.options.length > 0 && 'Options: ' + text.options.map((itm) => `\n -${itm.name} +  ${itm.price} `)} />
+                    </ListItem>
+                    {index !== cart.cart.length && <Divider />}
+                    </React.Fragment>
+                ))}
+            </List>
+            <Divider />
+            <List>
+                <ListItem button key={'Subtotal'}>
+                    <ListItemText primary={'Subtotal: '} secondary={cart && cart.total && `$${cart.total.toFixed(2)}`} />
+                </ListItem>
+                <ListItem button key={'Tax'}>
+                    <ListItemText primary={'Tax: '} secondary={(organization && organization.taxRate) && (cart && cart.total) ? `$${(cart.total * (organization.taxRate / 100)).toFixed(2)}` : ''} />
+                </ListItem>
+                <ListItem button key={'Total'}>
+                    <ListItemText primary={'Total: '} secondary={cart && cart.total && `$${cart.total.toFixed(2)}`} />
+                </ListItem>
+            </List>
+        </div>
+    );
+
     return (
         <div className={classes.root}>
-            <AppBar position="static" color="default">
+            <CssBaseline />
+            <AppBar position="fixed" color="default" className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="organization logo">
                         <Avatar alt={organization} src={org && organization.logo} />
@@ -101,8 +180,8 @@ const Main = (props) => {
                     >
                         {!loadingOrg ? organization.name : 'Bright Delivery'}
                     </Typography>
-                    {cart && cart.cart.length > 0 && <IconButton edge="end" className={classes.menuButton} onClick={() => console.log('the cart burton was pressed')} color="inherit" aria-label="view-cart">
-                        <Badge badgeContent={cart.cart.length} color="secondary">
+                    {cart && cart.cart.length > 0 && <IconButton edge="end" className={classes.menuButton} onClick={() => handleDrawerToggle()} color="inherit" aria-label="view-cart">
+                        <Badge badgeContent={getCartQty()} color="secondary">
                             <ShoppingBasketIcon />
                         </Badge>
 
@@ -125,15 +204,39 @@ const Main = (props) => {
                 }
 
             </AppBar>
-            {categories && firebaseDataMap(categories.docs).map((ti, i) => {
-                return <TabPanel key={ti.id} value={tab} index={i}>
-                    {/* <Container maxWidth='lg'> */}
-                    {loadingCats && <div>Loading...</div>}
-                    {categories && <ItemList app={firebase} category={ti} style={{ backgroundColor: 'gray' }} />}
-                    {/* </Container> */}
-                </TabPanel>
-            })}
+            <Drawer
+                variant="temporary"
+                anchor='right'
+                open={mobileOpen}
+                onClose={handleDrawerToggle}
+                className={classes.drawer}
+                classes={{
+                    paper: classes.drawerPaper,
+                }}
+                ModalProps={{
+                    keepMounted: true, // Better open performance on mobile.
+                }}
+            >
+                <div className={classes.toolbar} />
+                {drawer}
+            </Drawer>
+            <main className={classes.content}>
+                <div className={classes.toolbar} />
+                {categories && firebaseDataMap(categories.docs).map((ti, i) => {
+                    return <TabPanel key={ti.id} value={tab} index={i}>
+                        {loadingCats && <div>Loading...</div>}
+                        {categories && <ItemList app={firebase} category={ti} style={{ backgroundColor: 'gray' }} />}
+                    </TabPanel>
+                })}
+                <CheckoutButton/>
+                
+            </main>
+            
+            
+           
+
         </div>
+    
     )
 
 }

@@ -96,7 +96,6 @@ export default function Item(props) {
     let mutableArr = cart.cart || []
 
     if (addToCart && mutableArr.length === 0) {
-      console.log('here')
       const itm = {
         categoryName: category,
         ...data,
@@ -106,7 +105,6 @@ export default function Item(props) {
       mutableArr.push(itm)
     } else
       if (addToCart && mutableArr.length > 0) {
-        console.log('here2')
         const itm = {
           categoryName: category,
           ...data,
@@ -115,19 +113,18 @@ export default function Item(props) {
         }
         let itemPresent = false;
         for (let i = 0; i < mutableArr.length; i++) {
-          if (mutableArr[i].id === item.id && JSON.stringify(item.options) === JSON.stringify(mutableArr[i].options) ) {
+          if (mutableArr[i].id === item.id && JSON.stringify(item.options) === JSON.stringify(mutableArr[i].options)) {
             mutableArr[i].quantity += 1;
             itm.quantity = mutableArr[i].quantity;
             mutableArr[i] = itm;
             itemPresent = true;
           }
         }
-        if(!itemPresent){
+        if (!itemPresent) {
           mutableArr.push(itm)
         }
       } else
         if (!addToCart && mutableArr.length > 0) {
-          console.log('here3')
           // Reversed loop to prevent bugs from reaching same one again
           for (let i = mutableArr.length - 1; i >= 0; i--) {
             if (mutableArr[i].id === item.id) {
@@ -168,7 +165,6 @@ export default function Item(props) {
       quantity: 1,
     }
     if (!user) {
-      console.log('I want to see what the cart says', cart)
       app.auth().signInAnonymously()
         .then((usr) => {
           if (!cart || (cart && cart.cart.length === 0)) {
