@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 import { Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { CartContext } from 'context'
@@ -20,14 +20,15 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const CheckoutButton = (props) => {
+    const { totals } = props
     const cart = useContext(CartContext)
-    
+
     const classes = useStyles()
 
     console.log('this is the cart fomr the checkout button', cart)
     return (
         <div className={classes.root}>
-            <Button variant="contained" color='primary' >Checkout now</Button>
+            <Button variant="contained" color='primary' >Checkout now {totals && totals.total}</Button>
         </div>
     )
 }

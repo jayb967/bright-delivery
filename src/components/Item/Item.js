@@ -49,7 +49,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function Item(props) {
   const classes = useStyles();
-  const { data, app, category } = props
+  const { data, app, category, updateCart, createNewCart } = props
 
   const [open, setOpen] = useState(false);
   const [orderItem, setOrderItem] = useState()
@@ -58,7 +58,7 @@ export default function Item(props) {
 
   const user = useContext(AuthContext);
   const cart = useContext(CartContext);
-  const orgCollection = useContext(OrgContext)
+
 
 
   const handleOpen = () => {
@@ -69,93 +69,7 @@ export default function Item(props) {
     setOpen(false);
   };
 
-  // console.log('this is the cart in the item', cart)
-
-  const createNewCart = async (id, item) => {
-    if (!item || !id) return;
-    console.log('these are the two items received', id, item)
-
-    const newCart = {
-      customerID: id,
-      cart: [],
-      total: 0
-    }
-
-    newCart.cart.push(item)
-
-    const done = await createSubcollectionDocument(app, orgCollection, 'carts', 'activeCarts', id, newCart)
-
-    console.log('creating new cart was done', done)
-  }
-
-  const updateCart = (id, item, addToCart) => {
-    if (!cart && addToCart) {
-      return createNewCart(id, item)
-    }
-
-    let mutableArr = cart.cart || []
-
-    if (addToCart && mutableArr.length === 0) {
-      const itm = {
-        categoryName: category,
-        ...data,
-        options,
-        quantity
-      }
-      mutableArr.push(itm)
-    } else
-      if (addToCart && mutableArr.length > 0) {
-        const itm = {
-          categoryName: category,
-          ...data,
-          options,
-          quantity: 1
-        }
-        let itemPresent = false;
-        for (let i = 0; i < mutableArr.length; i++) {
-          if (mutableArr[i].id === item.id && JSON.stringify(item.options) === JSON.stringify(mutableArr[i].options)) {
-            mutableArr[i].quantity += 1;
-            itm.quantity = mutableArr[i].quantity;
-            mutableArr[i] = itm;
-            itemPresent = true;
-          }
-        }
-        if (!itemPresent) {
-          mutableArr.push(itm)
-        }
-      } else
-        if (!addToCart && mutableArr.length > 0) {
-          // Reversed loop to prevent bugs from reaching same one again
-          for (let i = mutableArr.length - 1; i >= 0; i--) {
-            if (mutableArr[i].id === item.id) {
-              if (mutableArr[i].quantity && mutableArr[i].quantity > 1) {
-                mutableArr[i].quantity -= 1;
-              } else {
-                mutableArr.splice(i, 1);
-              }
-            }
-          }
-        }
-
-    const getTotal = () => {
-      let total = 0.0
-      for (let i = 0; i < mutableArr.length; i++) {
-        const product = mutableArr[i];
-        total += product.quantity * product.price
-      }
-
-      return total;
-    }
-
-    const updatedCart = {
-      customerID: id,
-      total: getTotal(),
-      cart: mutableArr
-    }
-
-
-    updateSubcollectionDocument && updateSubcollectionDocument(app, orgCollection, 'carts', 'activeCarts', id, updatedCart)
-  }
+  
 
   const addToCart = () => {
     const item = {
@@ -169,8 +83,11 @@ export default function Item(props) {
         .then((usr) => {
           if (!cart || (cart && cart.cart.length === 0)) {
             createNewCart(usr.user.uid, item)
+            handleClose()
           } else {
             //update the cart
+            updateCart(usr.user.uid, item, true, quantity, category, options)
+            handleClose()
           }
 
         })
@@ -178,12 +95,12 @@ export default function Item(props) {
           // Handle Errors here.
           var errorCode = error.code;
           var errorMessage = error.message;
-          return alert('There was an error adding this to your order, please try again!')
           console.log('There was an  error signing in the user', errorCode, errorMessage)
-          // ...
+          return alert('There was an error adding this to your order, please try again!')
         });
     } else {
-      updateCart(user.uid, item, true)
+      updateCart(user.uid, item, true, quantity, category, options)
+      handleClose()
     }
   }
 
@@ -224,7 +141,7 @@ export default function Item(props) {
         </CardContent>
       </CardActionArea>
       <CardActions>
-        <Button size="large" color="secondary" onClick={() => handleOpen()}>
+        <Button size="large" fullWidth color="secondary" onClick={() => handleOpen()}>
           Add to order ${(data && data.price) ? parseFloat(data.price).toFixed(2) : ''}
         </Button>
       </CardActions>

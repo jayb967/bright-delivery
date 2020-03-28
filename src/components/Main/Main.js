@@ -25,6 +25,7 @@ import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core/styles';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
+import { createSubcollectionDocument, updateSubcollectionDocument } from 'data/FirestoreUpdate'
 
 import { withSnackbar } from 'notistack';
 import 'firebase/firestore'
@@ -33,6 +34,7 @@ import { FirebaseContext } from 'data/Firebase'
 import { firebaseDataMap } from 'helpers'
 import { TabPanel, ItemList, CheckoutButton } from 'components'
 import { AuthContext, OrgContext, CartContext } from 'context'
+import { capitalize } from 'helpers'
 
 const drawerWidth = 250;
 
@@ -119,7 +121,7 @@ const Main = (props) => {
         return {}
     }
 
-    const organization = handleOrg();
+
 
     const getCartQty = () => {
         let qty = 0
@@ -137,31 +139,159 @@ const Main = (props) => {
     const bottomChkOutButton = () => {
 
     }
+    const organization = handleOrg();
+
+    const createNewCart = async (id, item) => {
+        if (!item || !id) return;
+
+        const newCart = {
+            customerID: id,
+            cart: [],
+            total: 0
+        }
+
+        newCart.cart.push(item)
+
+        const done = await createSubcollectionDocument(firebase, orgname, 'carts', 'activeCarts', id, newCart)
+        console.log('creating new cart was done', done)
+        handleDrawerToggle()
+    }
+
+    const updateCart = (id, item, addToCart, quantity, category, options) => {
+        if (!cart && addToCart) {
+            return createNewCart(id, item)
+        }
+
+        let mutableArr = cart.cart || []
+
+        if (addToCart && mutableArr.length === 0) {
+            const itm = {
+                categoryName: category,
+                ...item,
+                options,
+                quantity
+            }
+            mutableArr.push(itm)
+        } else
+            if (addToCart && mutableArr.length > 0) {
+                const itm = {
+                    categoryName: category,
+                    ...item,
+                    options,
+                    quantity: 1
+                }
+                let itemPresent = false;
+                for (let i = 0; i < mutableArr.length; i++) {
+                    if (mutableArr[i].id === item.id && JSON.stringify(item.options) === JSON.stringify(mutableArr[i].options)) {
+                        mutableArr[i].quantity += 1;
+                        itm.quantity = mutableArr[i].quantity;
+                        mutableArr[i] = itm;
+                        itemPresent = true;
+                    }
+                }
+                if (!itemPresent) {
+                    mutableArr.push(itm)
+                }
+            } else
+                if (!addToCart && mutableArr.length > 0) {
+                    // Reversed loop to prevent bugs from reaching same one again
+                    for (let i = mutableArr.length - 1; i >= 0; i--) {
+                        if ((mutableArr[i].id === item.id) && JSON.stringify(item.options) === JSON.stringify(mutableArr[i].options)) {
+                            if (mutableArr[i].quantity && mutableArr[i].quantity > 1) {
+                                mutableArr[i].quantity -= 1;
+                            } else {
+                                mutableArr.splice(i, 1);
+                            }
+                        }
+                    }
+                }
+
+        const getTotal = () => {
+            let total = 0.0
+            for (let i = 0; i < mutableArr.length; i++) {
+                const product = mutableArr[i];
+                total += product.quantity * product.price
+                if (product.options.length > 0) {
+                    product.options.forEach(opt => {
+                        if (opt.price) {
+                            total += opt.price
+                        }
+                    });
+                }
+            }
+
+            return total;
+        }
+
+        const updatedCart = {
+            customerID: id,
+            total: getTotal(),
+            cart: mutableArr
+        }
+        updateSubcollectionDocument && updateSubcollectionDocument(firebase, orgname, 'carts', 'activeCarts', id, updatedCart)
+    }
+
+    const totalsDic = () => {
+        const totals = {
+            subtotal: cart && cart.total ? `${cart.total.toFixed(2)}` : '',
+            tax: (organization && organization.taxRate) && (cart && cart.total) ? `${(cart.total * (organization.taxRate / 100)).toFixed(2)}` : '',
+            delivery: '',
+            total: 0.0
+
+        }
+
+        totals.total = (totals.subtotal ? parseFloat(totals.subtotal) : 0) + (totals.tax ? parseFloat(totals.tax) : 0)
+
+
+
+        return totals;
+    }
+
+
+    const totals = totalsDic()
+
+
 
     const drawer = (
         <div>
             <div className={classes.toolbar} />
             <Divider />
             <List>
+                <ListItem button key={'Button'}>
+                    <Button variant="outlined" color="primary" onClick={handleDrawerToggle}>Close</Button>
+
+                </ListItem>
                 {cart && cart.cart.length && cart.cart.map((text, index) => (
                     <React.Fragment>
-                    <ListItem button key={text.id + index}>
-                        <ListItemText primary={`x${text.quantity} ${text.name}`} secondary={text.options.length > 0 && 'Options: ' + text.options.map((itm) => `\n -${itm.name} +  ${itm.price} `)} />
-                    </ListItem>
-                    {index !== cart.cart.length && <Divider />}
+
+                        <ListItem button key={text.id + index}>
+                            <ListItemText
+                                primary={`x${text.quantity} ${text.name && capitalize(text.name)}`}
+                                secondary={text.options.length > 0
+                                    && 'Options: ' + text.options.map(
+                                        (itm) => `\n -${itm.name} +  ${itm.price} `)} />
+                            <div style={{ display: 'flex' }}>
+                                <IconButton edge="end" onClick={() => updateCart(user.uid, text, false, 1, text.category, text.options || [])}>-</IconButton>
+                                <IconButton edge="end" onClick={() => updateCart(user.uid, text, true, 1, text.category, text.options || [])}>+</IconButton>
+                            </div>
+
+                        </ListItem>
+                        {index !== cart.cart.length && <Divider />}
                     </React.Fragment>
                 ))}
+
+
             </List>
             <Divider />
             <List>
                 <ListItem button key={'Subtotal'}>
-                    <ListItemText primary={'Subtotal: '} secondary={cart && cart.total && `$${cart.total.toFixed(2)}`} />
+                    <ListItemText primary={'Subtotal: '} secondary={totals.subtotal} />
                 </ListItem>
                 <ListItem button key={'Tax'}>
-                    <ListItemText primary={'Tax: '} secondary={(organization && organization.taxRate) && (cart && cart.total) ? `$${(cart.total * (organization.taxRate / 100)).toFixed(2)}` : ''} />
+                    <ListItemText primary={'Tax: '} secondary={totals.tax} />
                 </ListItem>
                 <ListItem button key={'Total'}>
-                    <ListItemText primary={'Total: '} secondary={cart && cart.total && `$${cart.total.toFixed(2)}`} />
+                    <ListItemText primary={'Total: '} secondary={totals.total} />
                 </ListItem>
             </List>
         </div>
@@ -225,18 +355,19 @@ const Main = (props) => {
                 {categories && firebaseDataMap(categories.docs).map((ti, i) => {
                     return <TabPanel key={ti.id} value={tab} index={i}>
                         {loadingCats && <div>Loading...</div>}
-                        {categories && <ItemList app={firebase} category={ti} style={{ backgroundColor: 'gray' }} />}
+                        {categories && <ItemList app={firebase} category={ti} style={{ backgroundColor: 'gray' }} updateCart={updateCart} createNewCart={createNewCart} />}
                     </TabPanel>
                 })}
-                <CheckoutButton/>
-                
+
+
             </main>
-            
-            
-           
+            <CheckoutButton totals={totals} />
+
+
+
 
         </div>
-    
+
     )
 
 }

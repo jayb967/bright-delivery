@@ -42,7 +42,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const ItemList = (props) => {
-    const { enqueueSnackbar, addToCart, category, app } = props
+    const { enqueueSnackbar, addToCart, category, app, updateCart, createNewCart } = props
     const classes = useStyles();
     const theme = useTheme();
     const viewportLg = useMediaQuery(theme.breakpoints.up('sm'));
@@ -81,7 +81,7 @@ const ItemList = (props) => {
             <GridList cellHeight='auto' className={classes.gridList}  cols={getGridListCols()}>
                 {firebaseDataMap(items.docs).map((item, i) => {
                     return <GridListTile  key={item.id} cols={1}>
-                        <Item data={item} category={category.name} app={app}/>
+                        <Item data={item} category={category.name} app={app} updateCart={updateCart} createNewCart={createNewCart}/>
                     </GridListTile>
                 })}
               
