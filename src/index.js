@@ -18,8 +18,6 @@ export default class BrightDel {
   static mount({ orgBrightdel, ...props } = {}) {
     const component = <App orgBrightdel={orgBrightdel} {...props} />;
 
-    console.log('this was called and this is the asdflkajsdflkj')
-
     function doRender() {
       if (BrightDel.el) {
         throw new Error('BrightDel is already mounted, unmount first');

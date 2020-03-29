@@ -20,14 +20,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const CheckoutButton = (props) => {
-    const { totals } = props
+    const { totals, openCheckout } = props
     const cart = useContext(CartContext)
 
     const classes = useStyles()
 
     return (
         <div className={classes.root}>
-            <Button variant="contained" color='primary' >Checkout now {totals && totals.total}</Button>
+            {cart && cart.cart.length > 0 && <Button variant="contained" color='primary' onClick={() => openCheckout && openCheckout(true)}>Checkout now {totals && totals.total}</Button>}
         </div>
     )
 }

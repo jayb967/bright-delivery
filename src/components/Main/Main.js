@@ -32,7 +32,7 @@ import 'firebase/firestore'
 
 import { FirebaseContext } from 'data/Firebase'
 import { firebaseDataMap } from 'helpers'
-import { TabPanel, ItemList, CheckoutButton } from 'components'
+import { TabPanel, ItemList, CheckoutButton, CheckoutModal } from 'components'
 import { AuthContext, OrgContext, CartContext } from 'context'
 import { capitalize } from 'helpers'
 
@@ -88,12 +88,19 @@ const Main = (props) => {
     const cart = useContext(CartContext);
     const [tab, setTab] = useState(0);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [checkoutOpen, setCheckoutOpen] = useState(false);
+
     const theme = useTheme()
     const mobileDevice = useMediaQuery(theme.breakpoints.down('sm'));
 
     // const orgname = 'panaderia-mexico' // This should be pulled in from the init from embed
 
-    const categoryQuery = firebase.firestore().collection(orgname).doc('menu').collection('categories').where('active', '==', true).orderBy('position', 'asc')
+    const categoryQuery = firebase.firestore()
+        .collection(orgname)
+        .doc('menu')
+        .collection('categories')
+        .where('active', '==', true)
+        .orderBy('position', 'asc')
 
     const [categories, loadingCats, errorCats] = useCollection(
         categoryQuery,
@@ -147,16 +154,16 @@ const Main = (props) => {
 
         const getTotal = () => {
             let total = 0.0
-                const product = item;
-                total += (product.quantity || 1) * product.price
-                if (product.options && product.options.length > 0) {
-                    product.options.forEach(opt => {
-                        if (opt.price) {
-                            total += opt.price
-                        }
-                    });
-                }
-            
+            const product = item;
+            total += (product.quantity || 1) * product.price
+            if (product.options && product.options.length > 0) {
+                product.options.forEach(opt => {
+                    if (opt.price) {
+                        total += opt.price
+                    }
+                });
+            }
+
 
             return total;
         }
@@ -170,7 +177,7 @@ const Main = (props) => {
         newCart.cart.push(item)
 
         const done = await createSubcollectionDocument(firebase, orgname, 'carts', 'activeCarts', id, newCart)
-        console.log('creating new cart was done', done)
+
         handleDrawerToggle()
     }
 
@@ -221,6 +228,9 @@ const Main = (props) => {
                             }
                         }
                     }
+                    if (mutableArr.length === 0) {
+                        handleDrawerToggle()
+                    }
                 }
 
         const getTotal = () => {
@@ -256,34 +266,37 @@ const Main = (props) => {
             total: 0.0
 
         }
+        const delivery = org && org.exists && org.data().deliveryFee
+        if(delivery){
+            totals.delivery = parseFloat(delivery)
+        }
 
         totals.total = (totals.subtotal ? parseFloat(totals.subtotal) : 0) + (totals.tax ? parseFloat(totals.tax) : 0)
+        
 
-
+       
 
         return totals;
     }
 
-
     const totals = totalsDic()
 
-
+    const handleChkDia = (val) => {
+        val != checkoutOpen && setCheckoutOpen(val)
+    }
 
     const drawer = (
         <div>
-            <div className={classes.toolbar} />
             <Divider />
             <List>
                 <ListItem button key={'Button'}>
                     <Button variant="outlined" color="primary" onClick={handleDrawerToggle}>Close</Button>
-
                 </ListItem>
                 {cart && cart.cart.length && cart.cart.map((text, index) => (
-                    <React.Fragment>
-
+                    <React.Fragment key={text.id + index}>
                         <ListItem button key={text.id + index}>
                             <ListItemText
-                                primary={`x${text.quantity} ${text.name && capitalize(text.name)}`}
+                                primary={`x${text.quantity} ${text.name && capitalize(text.name)}: $${text.price && (parseFloat(text.price) * (text.quantity || 1)).toFixed(2)}`}
                                 secondary={text.options.length > 0
                                     && 'Options: ' + text.options.map(
                                         (itm) => `\n -${itm.name} +  ${itm.price} `)} />
@@ -291,9 +304,7 @@ const Main = (props) => {
                                 <IconButton edge="end" onClick={() => updateCart(user.uid, text, false, 1, text.category, text.options || [])}>-</IconButton>
                                 <IconButton edge="end" onClick={() => updateCart(user.uid, text, true, 1, text.category, text.options || [])}>+</IconButton>
                             </div>
-
                         </ListItem>
-                        {index !== cart.cart.length && <Divider />}
                     </React.Fragment>
                 ))}
 
@@ -364,27 +375,19 @@ const Main = (props) => {
                     keepMounted: true, // Better open performance on mobile.
                 }}
             >
-                <div className={classes.toolbar} />
                 {drawer}
             </Drawer>
             <main className={classes.content}>
-                <div className={classes.toolbar} />
                 {categories && firebaseDataMap(categories.docs).map((ti, i) => {
                     return <TabPanel key={ti.id} value={tab} index={i}>
                         {loadingCats && <div>Loading...</div>}
                         {categories && <ItemList app={firebase} category={ti} style={{ backgroundColor: 'gray' }} updateCart={updateCart} createNewCart={createNewCart} />}
                     </TabPanel>
                 })}
-
-
             </main>
-            <CheckoutButton totals={totals} />
-
-
-
-
+            <CheckoutButton totals={totals} openCheckout={handleChkDia} />
+            <CheckoutModal open={checkoutOpen} totals={totals} handleChkDia={handleChkDia} />
         </div>
-
     )
 
 }

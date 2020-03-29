@@ -16,9 +16,8 @@ import 'react-square-payment-form/lib/default.css'
 
 
 function App(props) {
-  const {orgBrightdel} = props
+  const { orgBrightdel } = props
 
-  alert(`this is the the window.orgBrightdel ${orgBrightdel}`)
   return (
 
     <ThemeProvider theme={theme}>
@@ -32,8 +31,8 @@ function App(props) {
             <OrgContext.Provider value={orgBrightdel || 'panaderia-mexico'}>
               <AuthGuard>
                 <Cart>
-                    <Main />
-                    
+                  <Main />
+
                 </Cart>
               </AuthGuard>
             </OrgContext.Provider>

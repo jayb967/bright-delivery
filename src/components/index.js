@@ -7,3 +7,5 @@ export { default as FadeAnimation } from './FadeAnimation';
 export { default as OptionsCheck } from './OptionsCheck';
 export { default as Cart } from './Cart';
 export { default as CheckoutButton } from './CheckoutButton';
+export { default as CheckoutModal } from './CheckoutModal';
+export { default as PaymentModal } from './PaymentModal';
