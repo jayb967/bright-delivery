@@ -330,7 +330,7 @@ const Main = (props) => {
             <AppBar position="sticky" color="default" className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="organization logo">
-                        <Avatar alt={organization} src={org && organization.logo} />
+                        <Avatar alt={orgname} src={org && organization.logo} />
                     </IconButton>
                     <Typography variant="h6"
                         className={classes.title}
@@ -344,9 +344,12 @@ const Main = (props) => {
                         </Badge>
 
                     </IconButton>}
-                    <IconButton edge="end" className={classes.menuButton} onClick={() => signOut()} color="inherit" aria-label="signOut">
+                    {(user && user.email) && <IconButton edge="end" className={classes.menuButton} onClick={() => signOut()} color="inherit" aria-label="signOut">
                             <ExitToAppIcon />
                     </IconButton>
+                        
+                    }
+                    
                 </Toolbar>
                 {categories && <Tabs
                     value={tab}
