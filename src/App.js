@@ -32,7 +32,6 @@ function App(props) {
               <AuthGuard>
                 <Cart>
                   <Main />
-
                 </Cart>
               </AuthGuard>
             </OrgContext.Provider>

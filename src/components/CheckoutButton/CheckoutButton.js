@@ -5,12 +5,12 @@ import { CartContext } from 'context'
 
 const useStyles = makeStyles(theme => ({
     root: {
-        position: 'fixed',
+        // position: 'fixed',
         textAlign: 'center',
         bottom: 5,
         right: 'auto',
         left: 'auto',
-        width: '100vw',
+        // width: '100%',
         zIndex: 100
     },
     button: {

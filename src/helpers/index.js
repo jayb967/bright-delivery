@@ -6,3 +6,4 @@ export { default as capitalize } from "./capitalize";
 export { default as slugify } from "./slugify";
 export { default as useScript } from "./useScript";
 export { default as cleanText } from "./cleanText";
+export { default as handleUserLink } from "./handleUserLink";

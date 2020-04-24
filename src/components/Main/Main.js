@@ -21,6 +21,7 @@ import {
     useMediaQuery,
     Button
 } from '@material-ui/core';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 import { makeStyles } from '@material-ui/styles';
 import { useTheme } from '@material-ui/core/styles';
@@ -116,6 +117,10 @@ const Main = (props) => {
         }
     );
 
+    const signOut = () => {
+        firebase.auth().signOut()
+    }
+
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
@@ -144,9 +149,6 @@ const Main = (props) => {
         return qty;
     }
 
-    const bottomChkOutButton = () => {
-
-    }
     const organization = handleOrg();
 
     const createNewCart = async (id, item) => {
@@ -176,7 +178,7 @@ const Main = (props) => {
 
         newCart.cart.push(item)
 
-        const done = await createSubcollectionDocument(firebase, orgname, 'carts', 'activeCarts', id, newCart)
+        await createSubcollectionDocument(firebase, orgname, 'carts', 'activeCarts', id, newCart)
 
         handleDrawerToggle()
     }
@@ -272,10 +274,6 @@ const Main = (props) => {
         }
 
         totals.total = (totals.subtotal ? parseFloat(totals.subtotal) : 0) + (totals.tax ? parseFloat(totals.tax) : 0)
-        
-
-       
-
         return totals;
     }
 
@@ -322,6 +320,7 @@ const Main = (props) => {
                     <ListItemText primary={'Total: '} secondary={totals.total} />
                 </ListItem>
             </List>
+            <CheckoutButton totals={totals} openCheckout={handleChkDia} />
         </div>
     );
 
@@ -338,12 +337,16 @@ const Main = (props) => {
                     >
                         {!loadingOrg ? organization.name : 'Bright Delivery'}
                     </Typography>
+
                     {cart && cart.cart.length > 0 && <IconButton edge="end" className={classes.menuButton} onClick={() => handleDrawerToggle()} color="inherit" aria-label="view-cart">
                         <Badge badgeContent={getCartQty()} color="secondary">
                             <ShoppingBasketIcon />
                         </Badge>
 
                     </IconButton>}
+                    <IconButton edge="end" className={classes.menuButton} onClick={() => signOut()} color="inherit" aria-label="signOut">
+                            <ExitToAppIcon />
+                    </IconButton>
                 </Toolbar>
                 {categories && <Tabs
                     value={tab}
@@ -376,6 +379,7 @@ const Main = (props) => {
                 }}
             >
                 {drawer}
+                
             </Drawer>
             <main className={classes.content}>
                 {categories && firebaseDataMap(categories.docs).map((ti, i) => {
