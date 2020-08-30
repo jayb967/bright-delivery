@@ -8,10 +8,6 @@ import { AuthContext, CartContext, OrgContext } from 'context'
 import { FirebaseContext } from 'data/Firebase'
 
 
-
-
-
-
 const Cart = props => {
   const { children } = props;
   const firebase = useContext(FirebaseContext)

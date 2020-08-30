@@ -131,12 +131,12 @@ export default function Item(props) {
           image={data.image}// "https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80"
           title={data.name}
         />
-        <CardContent>
+        <CardContent style={{minHeight: '15vh'}}>
           <Typography gutterBottom variant="h5" component="h2">
             {data.name ? capitalize(data.name) : 'The Name of item'}
           </Typography>
           <Typography variant="body2" color="textSecondary" component="p">
-            {data.description || 'This plate is soo good, it is different than the picture but you get the point.'}
+            {data.description || 'This plate is soo good.'}
           </Typography>
         </CardContent>
       </CardActionArea>

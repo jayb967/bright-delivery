@@ -28,7 +28,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/styles';
 import { CartContext, AuthContext, OrgContext } from 'context'
 import { capitalize, handleUserLink } from 'helpers'
-import { PaymentModal } from 'components'
+import { PaymentModal, ContactInfo } from 'components'
 import { FirebaseContext } from 'data/Firebase'
 
 
@@ -59,6 +59,9 @@ const CheckoutModal = (props) => {
     const [delivery, setDelivery] = useState(false)
     const [signInopen, setSignInopen] = useState(false)
     const [anonUser, setAnonUser] = useState(null)
+    const [step, setStep] = useState(0)
+    const [cashPickup, setCashPickup] = useState(false)
+    const [contact, setContact] = useState({})
 
     const uiConfig = {
         // Popup signin flow rather than redirect flow.
@@ -107,6 +110,8 @@ const CheckoutModal = (props) => {
                         // Clean up
                         cart = null
                         setAnonUser(null)
+                        handleSignInClose()
+                        setStep(1)
                     })
 
 
@@ -116,6 +121,8 @@ const CheckoutModal = (props) => {
             signInSuccessWithAuthResult: (currentUser, credential, ) => {
                 // Creating new user Doc and deleting previous
                 handleUserLink(app, currentUser.user.email, currentUser.user.uid, org)
+                handleSignInClose()
+                setStep(1)
                 return false;
             },
             uiShown: () => {
@@ -125,6 +132,11 @@ const CheckoutModal = (props) => {
             }
         }
     };
+
+    const updateContact = (dic) => {
+        const newDic = {...contact, ...dic}
+        setContact(newDic)
+    }
 
     const handleClickOpen = () => {
         handleChkDia(true);
@@ -142,6 +154,8 @@ const CheckoutModal = (props) => {
         if (!user || (user && user.isAnonymous)) {
             setAnonUser(user) // setting reference to anon user
             setSignInopen(true)
+        } else {
+            setStep(1)
         }
         // setPaymentOpen(val)
     }
@@ -189,7 +203,7 @@ const CheckoutModal = (props) => {
                         <ListItemText primary={'Total: '} secondary={!delivery ? '$' + totals.total : '$' + (totals.total + totals.delivery).toFixed(2)} />
                     </ListItem>
                     <Divider />
-                    <ListItem>
+                    {step == 0 && <ListItem>
                         <FormControl component="fieldset">
                             <FormLabel component="legend">Method</FormLabel>
                             <RadioGroup row aria-label="position" name="position" defaultValue="top">
@@ -197,90 +211,32 @@ const CheckoutModal = (props) => {
                                 <FormControlLabel checked={!delivery} onClick={() => setDelivery(false)} value="end" control={<Radio color="primary" />} label="Take Out" />
                             </RadioGroup>
                         </FormControl>
-                    </ListItem>
+                    </ListItem>}
 
-                    {delivery && <ListItem>
+
+                    {delivery && step === 1 && <ListItem>
                         <div>
                             <h2>Where should we deliver?</h2>
-
-                            <TextField
-                                autoFocus
-                                margin="dense"
-                                id="address"
-                                label="Address"
-                                type="text"
-                                // onChange={(event) => setAddress2(handleChange(event))}
-                                placeholder='1234 Street'
-                                value={'address'}
-                                fullWidth
-                            />
-                            <TextField
-                                autoFocus
-                                margin="dense"
-                                id="address2"
-                                label="Apt/Suite Number (Optional)"
-                                type="text"
-                                // onChange={(event) => setAddress2(handleChange(event))}
-                                value={'address'}
-                                fullWidth
-                            />
-                            <TextField
-                                margin="dense"
-                                id="deliveryMsg"
-                                label={'Message to delivery driver (Optional)'}
-                                type="text"
-                                // onChange={(event) => setNote(handleChange(event))}
-                                value={'address'}
-                                fullWidth
-                            />
-                            <br />
-                            <TextField
-                                margin="dense"
-                                id="name"
-                                // error={name_first.length < 2}
-                                // helperText={name_first.length < 2 && 'Not a valid name!'}
-                                label="First Name"
-                                type="text"
-                                // onChange={(event) => setNameFirst(handleChange(event))}
-                                value={"First Name"}
-                                fullWidth
-                            />
-                            <TextField
-                                margin="dense"
-                                id="lastname"
-                                // error={name_last.length < 3}
-                                // helperText={name_last.length < 3 && 'Not a valid last name!'}
-                                label="Last Name"
-                                type="text"
-                                // onChange={(event) => setNameLast(handleChange(event))}
-                                value={"Last Name"}
-                                fullWidth
-                            />
+                            <ContactInfo data={contact} updateDic={updateContact}/>
                         </div>
-
-                        {/* <TextField
-                        margin="dense"
-                        id="phone"
-                        label="Where do we text you order updates?"
-                        error={!isValidPhoneNumber(`+1${phone}`)}
-                        helperText={
-                            !isValidPhoneNumber(`+1${phone}`)
-                                ? 'Not a valid phone!'
-                                : 'Awesome, we can now let you know when your order is close!'
-                        }
-                        type="tel"
-                        value={phone}
-                        onChange={(event) => setPhone(handleChange(event))}
-                        fullWidth
-                    /> */}
-
 
                     </ListItem>}
                 </List>
             </DialogContent>
             <DialogActions>
-                <Button autoFocus color="primary" variant="contained" onClick={() => handleOpenPayment(true)}>
-                    Place Order {`${!delivery ? '$' + totals.total : '$' + (totals.total + totals.delivery).toFixed(2)}`}
+                {step == 1 && <Button
+                    color="secondary"
+                    variant="outlined"
+                    onClick={() => setStep(0)}
+                >
+                    Back
+                </Button>}
+                <Button
+                    autoFocus
+                    color="primary"
+                    variant="contained"
+                    onClick={() => handleOpenPayment(true)}>
+                    {step == 0 ? 'Continue' : 'Place Order'} {`${!delivery ? '$' + totals.total : '$' + (totals.total + totals.delivery).toFixed(2)}`}
                 </Button>
 
             </DialogActions>

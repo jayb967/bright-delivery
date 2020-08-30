@@ -33,11 +33,11 @@ import 'firebase/firestore'
 
 import { FirebaseContext } from 'data/Firebase'
 import { firebaseDataMap } from 'helpers'
-import { TabPanel, ItemList, CheckoutButton, CheckoutModal } from 'components'
+import { TabPanel, ItemList, CheckoutButton, CheckoutModal, CartSideBar } from 'components'
 import { AuthContext, OrgContext, CartContext } from 'context'
-import { capitalize } from 'helpers'
 
-const drawerWidth = 250;
+
+const drawerWidth = '30vw';
 
 const useStyles = makeStyles(theme => ({
     appBar: {
@@ -52,7 +52,10 @@ const useStyles = makeStyles(theme => ({
     },
     content: {
         flexGrow: 1,
-        padding: theme.spacing(3)
+        padding: theme.spacing(3),
+        [theme.breakpoints.down('md')]: { // Breakpoint for mobile
+            padding: 0
+        }
     },
     // necessary for content to be below app bar
     toolbar: theme.mixins.toolbar,
@@ -71,6 +74,7 @@ const useStyles = makeStyles(theme => ({
         fontWeight: 600,
         fontSize: '1.5em'
     },
+    
 }));
 
 function a11yProps(index) {
@@ -283,47 +287,6 @@ const Main = (props) => {
         val != checkoutOpen && setCheckoutOpen(val)
     }
 
-    const drawer = (
-        <div>
-            <Divider />
-            <List>
-                <ListItem button key={'Button'}>
-                    <Button variant="outlined" color="primary" onClick={handleDrawerToggle}>Close</Button>
-                </ListItem>
-                {cart && cart.cart.length && cart.cart.map((text, index) => (
-                    <React.Fragment key={text.id + index}>
-                        <ListItem button key={text.id + index}>
-                            <ListItemText
-                                primary={`x${text.quantity} ${text.name && capitalize(text.name)}: $${text.price && (parseFloat(text.price) * (text.quantity || 1)).toFixed(2)}`}
-                                secondary={text.options.length > 0
-                                    && 'Options: ' + text.options.map(
-                                        (itm) => `\n -${itm.name} +  ${itm.price} `)} />
-                            <div style={{ display: 'flex' }}>
-                                <IconButton edge="end" onClick={() => updateCart(user.uid, text, false, 1, text.category, text.options || [])}>-</IconButton>
-                                <IconButton edge="end" onClick={() => updateCart(user.uid, text, true, 1, text.category, text.options || [])}>+</IconButton>
-                            </div>
-                        </ListItem>
-                    </React.Fragment>
-                ))}
-
-
-            </List>
-            <Divider />
-            <List>
-                <ListItem button key={'Subtotal'}>
-                    <ListItemText primary={'Subtotal: '} secondary={totals.subtotal} />
-                </ListItem>
-                <ListItem button key={'Tax'}>
-                    <ListItemText primary={'Tax: '} secondary={totals.tax} />
-                </ListItem>
-                <ListItem button key={'Total'}>
-                    <ListItemText primary={'Total: '} secondary={totals.total} />
-                </ListItem>
-            </List>
-            <CheckoutButton totals={totals} openCheckout={handleChkDia} />
-        </div>
-    );
-
     return (
         <div className={classes.root}>
             <CssBaseline />
@@ -381,7 +344,13 @@ const Main = (props) => {
                     keepMounted: true, // Better open performance on mobile.
                 }}
             >
-                {drawer}
+                <CartSideBar 
+                cart={cart} 
+                user={user} 
+                totals={totals} 
+                updateCart={updateCart} 
+                handleDrawerToggle={handleDrawerToggle} 
+                handleChkDia={handleChkDia}/>
                 
             </Drawer>
             <main className={classes.content}>

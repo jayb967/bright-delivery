@@ -9,3 +9,5 @@ export { default as Cart } from './Cart';
 export { default as CheckoutButton } from './CheckoutButton';
 export { default as CheckoutModal } from './CheckoutModal';
 export { default as PaymentModal } from './PaymentModal';
+export { default as ContactInfo } from './ContactInfo';
+export { default as CartSideBar } from './CartSideBar'; 
