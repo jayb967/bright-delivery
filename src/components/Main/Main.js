@@ -1,25 +1,16 @@
 import React, { useState, useContext } from 'react'
 import {
     Avatar,
-    Container,
     CssBaseline,
     AppBar,
     IconButton,
     Badge,
-    Divider,
     Drawer,
-    Hidden,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
     Tabs,
     Tab,
     Typography,
-    Box,
     Toolbar,
     useMediaQuery,
-    Button
 } from '@material-ui/core';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
