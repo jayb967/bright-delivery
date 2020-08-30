@@ -73,7 +73,7 @@ const useStyles = makeStyles(theme => ({
     root: {
         // display: 'flex',
         position: 'relative',
-        padding: theme.spacing(3)
+        // padding: theme.spacing(3)
     },
     tabs: {
         flexGrow: 1,
