@@ -90,7 +90,11 @@ const CheckoutModal = (props) => {
                 var cred = error.credential;
                 var cart = null; // temp data for current anon user
 
-                return app.firestore().collection(org).doc('carts').collection('activeCarts').doc(anonUser.uid).get()
+                return app.firestore()
+                    .collection(org)
+                    .doc('carts')
+                    .collection('activeCarts')
+                    .doc(anonUser.uid).get()
                     .then((snap) => {
                         // Copy cart from current anonymous user
                         cart = snap.data()
@@ -100,11 +104,25 @@ const CheckoutModal = (props) => {
                         if (cart && cart.customerID) {
                             cart.customerID = usr.user.uid
                         }
-                        return app.firestore().collection(org).doc('carts').collection('activeCarts').doc(usr.user.uid).set(
+
+                        handleUserLink(app, usr.user.email, usr.user.uid, org)
+                        
+                        return app.firestore()
+                        .collection(org)
+                        .doc('carts')
+                        .collection('activeCarts')
+                        .doc(usr.user.uid)
+                        .set(
                             cart, { merge: true })
+                        
                     })
                     .then(() => {
-                        return app.firestore().collection(org).doc('carts').collection('activeCarts').doc(anonUser.uid).delete()
+                        return app
+                        .firestore()
+                        .collection(org)
+                        .doc('carts')
+                        .collection('activeCarts')
+                        .doc(anonUser.uid).delete()
                     })
                     .then(() => {
                         if (anonUser) {
@@ -147,13 +165,13 @@ const CheckoutModal = (props) => {
             if (!contact.zip) return true
             if (!contact.state) return true
         } else
-            // if(delivery && step === 0){
-            //     if(!contact) return true
-            //     if(!contact.lastname) return true
-            //     if(!contact.name) return true
-            // }
+            if (type !== orderOptions[1] && step === 1) {
+                if (!contact) return true
+                if (!contact.lastname) return true
+                if (!contact.name) return true
+            }
 
-            return false
+        return false
     }
 
     const updateContact = (dic) => {

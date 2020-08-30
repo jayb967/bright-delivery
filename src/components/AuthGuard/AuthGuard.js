@@ -14,36 +14,7 @@ const AuthGuard = props => {
   const { children } = props;
   const firebase = useContext(FirebaseContext)
   const [user, loading, error] = useAuthState(firebase.auth());
-  
-  // useEffect(() => {
-  //   return () =>{
-  //     firebase.auth().onAuthStateChanged(user => {
-        
-  //       if(!user){
-  //         // User is signed out sign in Anonymous 
-  //       }
-  //     })
-  //   }
-    
-  // }, [user])
-  // const router = useRouter();
-
-
-  // useEffect(() => {
-
-  //   if (!user && router.location.pathname !== '/login') {
-  //     // console.log('router history', router.history, 'location', router.location)
-
-  //     router.history.push('/login');
-  //     return;
-  //   }
-
-  //   // if (user && user.email != 'admin@kushfly.com') {
-  //   //   router.history.push('/errors/error-401');
-  //   //   return
-  //   // }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [router]);
+ 
   return (
   <AuthContext.Provider value={user}>
     {children}

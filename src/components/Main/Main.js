@@ -44,8 +44,8 @@ const useStyles = makeStyles(theme => ({
         zIndex: theme.zIndex.drawer + 1,
     },
     categoryImage: {
-        maxHeight: '20vh', 
-        width: '100%', 
+        maxHeight: '20vh',
+        width: '100%',
         objectFit: 'cover'
     },
     drawer: {
@@ -184,7 +184,8 @@ const Main = (props) => {
         const newCart = {
             customerID: id,
             cart: [],
-            total: getTotal()
+            total: getTotal(),
+            updatedOn: Date.now()
         }
 
         newCart.cart.push(item)
@@ -198,8 +199,6 @@ const Main = (props) => {
         if (!cart && addToCart) {
             return createNewCart(id, item)
         }
-
-        console.log('addToCart', addToCart)
 
         let mutableArr = cart.cart || []
 
@@ -273,6 +272,19 @@ const Main = (props) => {
             updatedOn: Date.now()
         }
         updateSubcollectionDocument && updateSubcollectionDocument(firebase, orgname, 'carts', 'activeCarts', id, updatedCart)
+            .then((updated) => {
+                if (!updated) {
+                    return enqueueSnackbar && enqueueSnackbar('Error updating Cart!', {
+                        variant: 'error',
+                    });
+                }
+
+                return enqueueSnackbar && enqueueSnackbar('Cart Updated!', {
+                    variant: 'success',
+                    autoHideDuration: 700
+                });
+
+            })
     }
 
     const totalsDic = () => {
@@ -383,4 +395,4 @@ const Main = (props) => {
 
 }
 
-export default Main;
+export default withSnackbar(Main);

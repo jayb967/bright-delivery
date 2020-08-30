@@ -5,19 +5,30 @@ export default async (app, email, id, org) => {
             .collectionGroup('users')
             .where('email', '==', email).get()
             .then(res => {
-                if (res.docs.length > 0) {
+                if (res.docs && res.docs.length > 0) {
                     const oldDoc = res.docs[0].data()
                     const deleteID = res.docs[0].id
                     return app.firestore().collection(org).doc('customers').collection('users').doc(id).set({ ...oldDoc })
                         .then((res) => {
-                            console.log('this is what will be deleted', deleteID, 'this is the res after creating doc', res)
                             return app.firestore().collection(org).doc('customers').collection('users').doc(deleteID).delete()
 
                         })
                         .then(() => true)
                 }
+                // return false
 
-                return false
+                const newUserDic = {
+                    email,
+                    uid: id,
+                    updatedOn: Date.now()
+                }
+                // Create new user if doesn't exist
+                return app.firestore()
+                .collection(org)
+                .doc('customers')
+                .collection('users')
+                .doc(id).set({ ...newUserDic })
+                .then(() => true)
             })
 
         return console.log('this is the done', done)
