@@ -8,6 +8,7 @@ import {
     DialogContent,
     DialogActions,
     Divider,
+    Grid,
     List,
     ListItem,
     ListItemText,
@@ -55,8 +56,10 @@ const CheckoutModal = (props) => {
     const app = useContext(FirebaseContext);
     const org = useContext(OrgContext);
 
+    const orderOptions = ['take-out', 'delivery', 'dine-in']
+
     const [paymentOpen, setPaymentOpen] = useState(false)
-    const [delivery, setDelivery] = useState(false)
+    const [type, setType] = useState(orderOptions[0])
     const [signInopen, setSignInopen] = useState(false)
     const [anonUser, setAnonUser] = useState(null)
     const [step, setStep] = useState(0)
@@ -118,7 +121,7 @@ const CheckoutModal = (props) => {
                 // Finish sign-in after data is copied.
                 // return app.auth().signInWithCredential(cred);
             },
-            signInSuccessWithAuthResult: (currentUser, credential, ) => {
+            signInSuccessWithAuthResult: (currentUser, credential,) => {
                 // Creating new user Doc and deleting previous
                 handleUserLink(app, currentUser.user.email, currentUser.user.uid, org)
                 handleSignInClose()
@@ -133,8 +136,28 @@ const CheckoutModal = (props) => {
         }
     };
 
+    const returnDisabled = () => {
+
+        if (type === orderOptions[1] && step === 1) {
+            if (!contact) return true
+            if (!contact.address) return true
+            if (!contact.city) return true
+            if (!contact.lastname) return true
+            if (!contact.name) return true
+            if (!contact.zip) return true
+            if (!contact.state) return true
+        } else
+            // if(delivery && step === 0){
+            //     if(!contact) return true
+            //     if(!contact.lastname) return true
+            //     if(!contact.name) return true
+            // }
+
+            return false
+    }
+
     const updateContact = (dic) => {
-        const newDic = {...contact, ...dic}
+        const newDic = { ...contact, ...dic }
         setContact(newDic)
     }
 
@@ -174,54 +197,82 @@ const CheckoutModal = (props) => {
                 </Toolbar>
             </AppBar>
             <DialogContent>
-                <List>
-                    {cart && cart.cart.length > 0 && cart.cart.map((item, i) => (
-                        <React.Fragment key={item.id + i}>
-                            <ListItem>
-                                <ListItemAvatar>
-                                    <Avatar alt={item.name} src={item && item.image} />
-                                </ListItemAvatar>
-                                <ListItemText primary={`${item.name && capitalize(item.name)} x${(item.quantity || '1')} `} secondary={((item.price || 0) * (item.quantity || 1.0)).toFixed(2)} />
-                            </ListItem>
-                            <Divider />
+                <Grid container>
+                    <Grid item xs={12} sm={12} md={6} className={classes.textCarouselContainer}>
+                        <List>
+                            {cart && cart.cart.length > 0 && cart.cart.map((item, i) => (
+                                <React.Fragment key={item.id + i}>
+                                    <ListItem>
+                                        <ListItemAvatar>
+                                            <Avatar alt={item.name} src={item && item.image} />
+                                        </ListItemAvatar>
+                                        <ListItemText primary={`${item.name && capitalize(item.name)} x${(item.quantity || '1')} `} secondary={((item.price || 0) * (item.quantity || 1.0)).toFixed(2)} />
+                                    </ListItem>
+                                    <Divider />
 
-                        </React.Fragment>
+                                </React.Fragment>
 
-                    ))}
-                    <ListItem>
-                        <ListItemText primary={'Subtotal: '} secondary={'$' + totals.subtotal} />
-                    </ListItem>
-                    <Divider />
-                    {delivery && <ListItem>
-                        <ListItemText primary={'Delivery: '} secondary={totals.delivery && '$' + totals.delivery.toFixed(2)} />
-                    </ListItem>}
-                    <ListItem>
-                        <ListItemText primary={'Tax: '} secondary={'$' + totals.tax} />
-                    </ListItem>
-                    <Divider />
-                    <ListItem>
-                        <ListItemText primary={'Total: '} secondary={!delivery ? '$' + totals.total : '$' + (totals.total + totals.delivery).toFixed(2)} />
-                    </ListItem>
-                    <Divider />
-                    {step == 0 && <ListItem>
-                        <FormControl component="fieldset">
-                            <FormLabel component="legend">Method</FormLabel>
-                            <RadioGroup row aria-label="position" name="position" defaultValue="top">
-                                <FormControlLabel checked={delivery} onClick={() => setDelivery(true)} value="end" control={<Radio color="primary" />} label="Delivery" />
-                                <FormControlLabel checked={!delivery} onClick={() => setDelivery(false)} value="end" control={<Radio color="primary" />} label="Take Out" />
-                            </RadioGroup>
-                        </FormControl>
-                    </ListItem>}
+                            ))}
+                        </List>
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={6} className={classes.textCarouselContainer}>
+                        <List>
+                            {((step === 0) || (type !== orderOptions[1] && step == 1)) && <React.Fragment>
+                                <ListItem>
+                                    <ListItemText primary={'Subtotal: '} secondary={'$' + totals.subtotal} />
+                                </ListItem>
+                                <Divider />
+                                {type === orderOptions[1] && <ListItem>
+                                    <ListItemText primary={'Delivery: '} secondary={totals.delivery && '$' + totals.delivery.toFixed(2)} />
+                                </ListItem>}
+                                <ListItem>
+                                    <ListItemText primary={'Tax: '} secondary={'$' + totals.tax} />
+                                </ListItem>
+                                <Divider />
+                                <ListItem>
+                                    <ListItemText primary={'Total: '}
+                                        secondary={type !== orderOptions[1]
+                                            ? '$' + totals.total
+                                            : '$' + (totals.total + totals.delivery).toFixed(2)} />
+                                </ListItem>
+                                <Divider />
 
 
-                    {delivery && step === 1 && <ListItem>
-                        <div>
-                            <h2>Where should we deliver?</h2>
-                            <ContactInfo data={contact} updateDic={updateContact}/>
-                        </div>
 
-                    </ListItem>}
-                </List>
+                            </React.Fragment>}
+                            {step == 0 && <ListItem>
+                                <FormControl component="fieldset">
+                                    <FormLabel component="legend">Method</FormLabel>
+                                    <RadioGroup row aria-label="position" name="position" defaultValue="top">
+                                        <FormControlLabel
+                                            checked={type === orderOptions[1]}
+                                            onClick={() => setType(orderOptions[1])}
+                                            value="end"
+                                            control={<Radio color="primary" />}
+                                            label="Delivery" />
+
+                                        <FormControlLabel
+                                            checked={type === orderOptions[0]}
+                                            onClick={() => setType(orderOptions[0])}
+                                            value="end"
+                                            control={<Radio color="primary" />}
+                                            label="Take Out" />
+                                    </RadioGroup>
+                                </FormControl>
+                            </ListItem>}
+                            {console.log('this is the delivery', type)}
+
+                            {step === 1 && <ListItem>
+                                <div>
+                                    <h2>{type !== orderOptions[1] ? 'What is your name?' : 'Where should we deliver?'}</h2>
+                                    <ContactInfo data={contact} updateDic={updateContact} type={type} />
+                                </div>
+
+                            </ListItem>}
+                        </List>
+                    </Grid>
+                </Grid>
+
             </DialogContent>
             <DialogActions>
                 {step == 1 && <Button
@@ -234,9 +285,10 @@ const CheckoutModal = (props) => {
                 <Button
                     autoFocus
                     color="primary"
+                    disabled={returnDisabled()}
                     variant="contained"
                     onClick={() => handleOpenPayment(true)}>
-                    {step == 0 ? 'Continue' : 'Place Order'} {`${!delivery ? '$' + totals.total : '$' + (totals.total + totals.delivery).toFixed(2)}`}
+                    {step == 0 ? 'Continue' : 'Place Order'} {`${type !== orderOptions[1] ? '$' + totals.total : '$' + (totals.total + totals.delivery).toFixed(2)}`}
                 </Button>
 
             </DialogActions>

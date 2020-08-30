@@ -6,12 +6,11 @@ import { CartContext } from 'context'
 
 const useStyles = makeStyles(theme => ({
     root: {
-        // position: 'fixed',
         textAlign: 'center',
         bottom: 5,
         right: 'auto',
         left: 'auto',
-        // width: '100%',
+        marginTop: 15,
         zIndex: 100,
         [theme.breakpoints.down('md')]: { // Breakpoint for mobile
             position: 'fixed',
@@ -21,12 +20,10 @@ const useStyles = makeStyles(theme => ({
         }
     },
     cartStyle: {
-         // position: 'fixed',
          textAlign: 'center',
          bottom: 5,
          right: 'auto',
          left: 'auto',
-         // width: '100%',
          zIndex: 100,
     }
 

@@ -199,6 +199,8 @@ const Main = (props) => {
             return createNewCart(id, item)
         }
 
+        console.log('addToCart', addToCart)
+
         let mutableArr = cart.cart || []
 
         if (addToCart && mutableArr.length === 0) {
@@ -220,6 +222,7 @@ const Main = (props) => {
                 let itemPresent = false;
                 for (let i = 0; i < mutableArr.length; i++) {
                     if (mutableArr[i].id === item.id && JSON.stringify(item.options) === JSON.stringify(mutableArr[i].options)) {
+                        console.log('we are here????', JSON.stringify(item.options) === JSON.stringify(mutableArr[i].options))
                         mutableArr[i].quantity += 1;
                         itm.quantity = mutableArr[i].quantity;
                         mutableArr[i] = itm;
@@ -302,7 +305,6 @@ const Main = (props) => {
             <AppBar position="sticky" color="white" className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="organization logo">
-                        {console.log('this is the organization.logo', organization.logo)}
                         <Avatar alt={orgname} src={org && organization.logo} />
                     </IconButton>
                     <Typography variant="h6"
