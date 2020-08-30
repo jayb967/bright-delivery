@@ -162,7 +162,7 @@ const CheckoutModal = (props) => {
 
 
     return (
-        <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
+        <Dialog fullWidth maxWidth='md' open={open} onClose={handleClose} TransitionComponent={Transition}>
             <AppBar className={classes.appBar} color="secondary">
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">

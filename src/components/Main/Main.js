@@ -46,9 +46,15 @@ const useStyles = makeStyles(theme => ({
     drawer: {
         width: drawerWidth,
         flexShrink: 0,
+        [theme.breakpoints.down('sm')]: {
+            width: '80vw',
+        },
     },
     drawerPaper: {
         width: drawerWidth,
+        [theme.breakpoints.down('sm')]: {
+            width: '80vw',
+        },
     },
     content: {
         flexGrow: 1,
@@ -74,7 +80,7 @@ const useStyles = makeStyles(theme => ({
         fontWeight: 600,
         fontSize: '1.5em'
     },
-    
+
 }));
 
 function a11yProps(index) {
@@ -97,8 +103,6 @@ const Main = (props) => {
 
     const theme = useTheme()
     const mobileDevice = useMediaQuery(theme.breakpoints.down('sm'));
-
-    // const orgname = 'panaderia-mexico' // This should be pulled in from the init from embed
 
     const categoryQuery = firebase.firestore()
         .collection(orgname)
@@ -137,8 +141,6 @@ const Main = (props) => {
         if (!loadingOrg && org) return org.data()
         return {}
     }
-
-
 
     const getCartQty = () => {
         let qty = 0
@@ -259,7 +261,8 @@ const Main = (props) => {
         const updatedCart = {
             customerID: id,
             total: getTotal(),
-            cart: mutableArr
+            cart: mutableArr,
+            updatedOn: Date.now()
         }
         updateSubcollectionDocument && updateSubcollectionDocument(firebase, orgname, 'carts', 'activeCarts', id, updatedCart)
     }
@@ -273,7 +276,7 @@ const Main = (props) => {
 
         }
         const delivery = org && org.exists && org.data().deliveryFee
-        if(delivery){
+        if (delivery) {
             totals.delivery = parseFloat(delivery)
         }
 
@@ -284,6 +287,7 @@ const Main = (props) => {
     const totals = totalsDic()
 
     const handleChkDia = (val) => {
+        mobileOpen && setMobileOpen(false);
         val != checkoutOpen && setCheckoutOpen(val)
     }
 
@@ -308,11 +312,11 @@ const Main = (props) => {
 
                     </IconButton>}
                     {(user && user.email) && <IconButton edge="end" className={classes.menuButton} onClick={() => signOut()} color="inherit" aria-label="signOut">
-                            <ExitToAppIcon />
+                        <ExitToAppIcon />
                     </IconButton>
-                        
+
                     }
-                    
+
                 </Toolbar>
                 {categories && <Tabs
                     value={tab}
@@ -344,14 +348,13 @@ const Main = (props) => {
                     keepMounted: true, // Better open performance on mobile.
                 }}
             >
-                <CartSideBar 
-                cart={cart} 
-                user={user} 
-                totals={totals} 
-                updateCart={updateCart} 
-                handleDrawerToggle={handleDrawerToggle} 
-                handleChkDia={handleChkDia}/>
-                
+                <CartSideBar
+                    cart={cart}
+                    user={user}
+                    totals={totals}
+                    updateCart={updateCart}
+                    handleDrawerToggle={handleDrawerToggle}
+                    handleChkDia={handleChkDia} />
             </Drawer>
             <main className={classes.content}>
                 {categories && firebaseDataMap(categories.docs).map((ti, i) => {

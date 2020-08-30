@@ -2,26 +2,12 @@ import React from 'react'
 import { makeStyles } from '@material-ui/styles';
 import {
     Avatar,
-    Container,
-    CssBaseline,
-    AppBar,
-    IconButton,
-    Badge,
     Divider,
-    Drawer,
-    Hidden,
     List,
     Fab,
     ListItem,
     ListItemAvatar,
-    ListItemIcon,
     ListItemText,
-    Tabs,
-    Tab,
-    Typography,
-    Box,
-    Toolbar,
-    useMediaQuery,
     Button
 } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Remove';
@@ -76,7 +62,6 @@ const CartSideBar = (props) => {
                     </ListItem>
                 </React.Fragment>
             ))}
-
         </List>
         <Divider />
         <List>
