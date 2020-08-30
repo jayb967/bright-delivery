@@ -43,6 +43,11 @@ const useStyles = makeStyles(theme => ({
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
     },
+    categoryImage: {
+        maxHeight: '20vh', 
+        width: '100%', 
+        objectFit: 'cover'
+    },
     drawer: {
         width: drawerWidth,
         flexShrink: 0,
@@ -58,7 +63,7 @@ const useStyles = makeStyles(theme => ({
     },
     content: {
         flexGrow: 1,
-        padding: theme.spacing(3),
+        // padding: theme.spacing(3),
         [theme.breakpoints.down('md')]: { // Breakpoint for mobile
             padding: 0
         }
@@ -294,15 +299,16 @@ const Main = (props) => {
     return (
         <div className={classes.root}>
             <CssBaseline />
-            <AppBar position="sticky" color="default" className={classes.appBar}>
+            <AppBar position="sticky" color="white" className={classes.appBar}>
                 <Toolbar>
                     <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="organization logo">
+                        {console.log('this is the organization.logo', organization.logo)}
                         <Avatar alt={orgname} src={org && organization.logo} />
                     </IconButton>
                     <Typography variant="h6"
                         className={classes.title}
                     >
-                        {!loadingOrg ? organization.name : 'Bright Delivery'}
+                        {!loadingOrg ? organization.name : 'Bright Ordering'}
                     </Typography>
 
                     {cart && cart.cart.length > 0 && <IconButton edge="end" className={classes.menuButton} onClick={() => handleDrawerToggle()} color="inherit" aria-label="view-cart">
@@ -328,7 +334,11 @@ const Main = (props) => {
                     aria-label="scrollable auto tabs example"
                 >
                     {firebaseDataMap(categories.docs).map((ti, i) => {
-                        return <Tab key={ti.id} label={ti.name} {...a11yProps(i)} />
+                        return <Tab
+                            key={ti.id}
+                            icon={<img className={classes.categoryImage} src={'/general_food.jpg'} />}
+                            label={ti.name} {...a11yProps(i)}
+                            wrapper={{ backgroundColor: 'white' }} />
                     })
                     }
                 </Tabs>
