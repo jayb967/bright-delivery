@@ -4,7 +4,8 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 // const path = require('path');
 const path = require("path")
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin")
+// const UglifyJsPlugin = require("uglifyjs-webpack-plugin")
+const TerserPlugin = require('terser-webpack-plugin');
 
 const devMode = process.env.NODE_ENV !== 'production';
 
@@ -106,7 +107,7 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        // exclude: /node_modules/,
+        exclude: /node_modules/,
         loader: 'babel-loader'
       },
       {
@@ -130,6 +131,7 @@ module.exports = {
     }
   },
   optimization: {
-    minimizer: [new UglifyJsPlugin()]
+    minimize: true,
+    minimizer: [new TerserPlugin()]
   }
 }
