@@ -27,8 +27,7 @@
     "react-firebaseui": "^4.1.0",
     "react-scripts": "3.4.1",
     "react-spring": "^8.0.27",
-    "react-square-payment-form": "^0.6.1",
-    "uglifyjs-webpack-plugin": "^2.2.0"
+    "react-square-payment-form": "^0.6.1"
   },
   "scripts": {
     "start": "webpack-dev-server --inline --hot",
@@ -56,6 +55,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "svg-inline-loader": "^0.8.2",
+    "terser-webpack-plugin": "^4.1.0",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3",
