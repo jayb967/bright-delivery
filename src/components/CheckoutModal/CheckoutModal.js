@@ -106,7 +106,7 @@ const CheckoutModal = (props) => {
                         }
 
                         handleUserLink(app, usr.user.email, usr.user.uid, org)
-                        
+
                         return app.firestore()
                         .collection(org)
                         .doc('carts')
@@ -278,8 +278,6 @@ const CheckoutModal = (props) => {
                                     </RadioGroup>
                                 </FormControl>
                             </ListItem>}
-                            {console.log('this is the delivery', type)}
-
                             {step === 1 && <ListItem>
                                 <div>
                                     <h2>{type !== orderOptions[1] ? 'What is your name?' : 'Where should we deliver?'}</h2>

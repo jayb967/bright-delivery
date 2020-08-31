@@ -121,6 +121,7 @@ const Main = (props) => {
         }
     );
 
+
     const signOut = () => {
         firebase.auth().signOut()
     }
